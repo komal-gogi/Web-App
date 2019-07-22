@@ -1,0 +1,11 @@
+version: 2.0
+jobs:
+  build:
+    docker: 
+      - image: apline:3.7
+    steps:
+      - run:
+          name: The first step
+          command: |
+            echo 'Heloo World!'
+            echo 'This is the delivery pipeline'
