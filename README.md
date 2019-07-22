@@ -23,3 +23,5 @@ jobs:
 Part Two: Adding checkout commands to get subsequent steps
 
 - now add seconf run step and do ls -al
+
+Part three: adding reference to docker image for build job
