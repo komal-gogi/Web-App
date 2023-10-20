@@ -95,7 +95,7 @@ func deleteEvent(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	router := mux.NewRouter()
-	log.Info("Hi..")
+	fmt.Println("Hi..")
 	router.HandleFunc("/", homelink)
 	router.HandleFunc("/event", createEvent).Methods("POST")
 	router.HandleFunc("/events", getAllEvents).Methods("GET")
