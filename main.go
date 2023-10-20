@@ -102,4 +102,6 @@ func main() {
 	router.HandleFunc("/event/{id}", updateEvent).Methods("PATCH")
 	router.HandleFunc("/event/{id}", deleteEvent).Methods("DELETE")
 	log.Fatal(http.ListenAndServe(":8080", router))
+	fmt.Print("Hello")
 }
+
