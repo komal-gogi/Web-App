@@ -1,21 +1,25 @@
-version: 2.0
+version: 2.1
 jobs:
   build:
+    working_directory: ~/repo
     docker:
-      - image: circleci/node:10-browsers
+      - image: circleci/golang:latest
     steps:
       - checkout
+      - restore_cache:
+          keys:
+            - go-mod-v4-{{ checksum "go.sum" }}
       - run:
-          name: The First Step
-          command: |
-            echo 'Hello World!'
-            echo 'This is the delivery pipeline'
+          name: Install Dependencies
+          command: go mod download
+      - save_cache:
+          key: go-mod-v4-{{ checksum "go.sum" }}
+          paths:
+            - "/go/pkg/mod"
       - run:
-          name: code has arrived
+          name: Run tests
           command: |
-            ls -al
-            echo '***this should look familiar***'
-      - run:
-          name: Running in unique conatiner
-          command: |
-            node -v
+            mkdir -p /tmp/test-reports
+            gotestsum --junitfile /tmp/test-reports/unit-tests.xml
+      - store_test_results:
+          path: /tmp/test-reports
