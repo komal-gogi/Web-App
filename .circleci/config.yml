@@ -15,7 +15,6 @@ jobs:
           command: |
             go get -u github.com/golang/dep/cmd/dep
             go get -u github.com/gorilla/mux
-            dep ensure
 
       - run:
           name: Run Tests
