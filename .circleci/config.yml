@@ -16,6 +16,19 @@ jobs:
             go get -u github.com/golang/dep/cmd/dep
             go get -u github.com/gorilla/mux
 
+  test: # New test job
+    docker:
+      - image: golang:latest
+
+    working_directory: /go/src/github.com/komal-gogi/Web-App
+
+    steps:
+      - checkout
+      - run:
+          name: Setup Go
+          command: |
+            go get -u github.com/golang/dep/cmd/dep
+            go get -u github.com/gorilla/mux
       - run:
           name: Run Tests
           command: |
@@ -26,3 +39,4 @@ workflows:
   build:
     jobs:
       - build
+      - test 
