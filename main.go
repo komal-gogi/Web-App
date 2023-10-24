@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 
@@ -27,21 +27,27 @@ var events = allEvents{
 	{
 		ID:          "2",
 		Title:       "Advance Golang",
-		Description: "Yes yes i agree hahaha",
+		Description: "Yes, I agree, hahaha",
 	},
 }
 
 func homelink(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "welcome onboard!")
+	fmt.Fprintf(w, "Welcome aboard!")
 }
 
 func createEvent(w http.ResponseWriter, r *http.Request) {
 	var newEvent event
-	reqBody, err := ioutil.ReadAll(r.Body)
+	reqBody, err := io.ReadAll(r.Body)
 	if err != nil {
-		fmt.Fprintf(w, "Kindly enter data with the event title and description only in order to update")
+		http.Error(w, "Bad request", http.StatusBadRequest)
+		return
 	}
-	json.Unmarshal(reqBody, &newEvent)
+
+	if err := json.Unmarshal(reqBody, &newEvent); err != nil {
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+
 	events = append(events, newEvent)
 	w.WriteHeader(http.StatusCreated)
 
@@ -54,8 +60,11 @@ func getOneEvent(w http.ResponseWriter, r *http.Request) {
 	for _, singleEvent := range events {
 		if singleEvent.ID == eventID {
 			json.NewEncoder(w).Encode(singleEvent)
+			return
 		}
 	}
+
+	http.Error(w, "Event not found", http.StatusNotFound)
 }
 
 func getAllEvents(w http.ResponseWriter, r *http.Request) {
@@ -66,21 +75,28 @@ func updateEvent(w http.ResponseWriter, r *http.Request) {
 	eventID := mux.Vars(r)["id"]
 	var updatedEvent event
 
-	reqBody, err := ioutil.ReadAll(r.Body)
+	reqBody, err := io.ReadAll(r.Body)
 	if err != nil {
-		fmt.Fprintf(w, "blah blah........")
+		http.Error(w, "Bad request", http.StatusBadRequest)
+		return
 	}
 
-	json.Unmarshal(reqBody, &updatedEvent)
+	if err := json.Unmarshal(reqBody, &updatedEvent); err != nil {
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
 
 	for i, singleEvent := range events {
 		if singleEvent.ID == eventID {
 			singleEvent.Title = updatedEvent.Title
-			singleEvent.Description = singleEvent.Description
-			events = append(events[:i], singleEvent)
+			singleEvent.Description = updatedEvent.Description
+			events[i] = singleEvent
 			json.NewEncoder(w).Encode(singleEvent)
+			return
 		}
 	}
+
+	http.Error(w, "Event not found", http.StatusNotFound)
 }
 
 func deleteEvent(w http.ResponseWriter, r *http.Request) {
@@ -88,9 +104,12 @@ func deleteEvent(w http.ResponseWriter, r *http.Request) {
 	for i, singleEvent := range events {
 		if singleEvent.ID == eventID {
 			events = append(events[:i], events[i+1:]...)
-			fmt.Fprintf(w, "the event ID %v has been deleted succesfully")
+			fmt.Fprintf(w, "The event ID %s has been deleted successfully", eventID)
+			return
 		}
 	}
+
+	http.Error(w, "Event not found", http.StatusNotFound)
 }
 
 func main() {
@@ -101,5 +120,6 @@ func main() {
 	router.HandleFunc("/event/{id}", getOneEvent).Methods("GET")
 	router.HandleFunc("/event/{id}", updateEvent).Methods("PATCH")
 	router.HandleFunc("/event/{id}", deleteEvent).Methods("DELETE")
+
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
