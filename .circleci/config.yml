@@ -6,22 +6,18 @@ jobs:
       - image: golang:latest # Replace with your preferred Go version
 
     working_directory: /go/src/github.com/komal-gogi/Web-App
-
     steps:
       - checkout # Check out your code from your VCS (e.g., GitHub)
-
       - run:
           name: Setup Go
           command: |
             go get -u github.com/golang/dep/cmd/dep
             go get -u github.com/gorilla/mux
 
-  test: # New test job
+  test:
     docker:
       - image: golang:latest
-
     working_directory: /go/src/github.com/komal-gogi/Web-App
-
     steps:
       - checkout
       - run:
